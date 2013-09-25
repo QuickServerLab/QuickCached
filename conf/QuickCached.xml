@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<quickserver>
+	<name>QuickCached</name>
+	<port>11211</port>
+	<bind-address>0.0.0.0</bind-address>
+
+	<!-- business logic classes -->
+	<client-event-handler>
+		com.quickserverlab.quickcached.CommandHandler
+	</client-event-handler>
+
+	<client-binary-handler>
+		com.quickserverlab.quickcached.CommandHandler
+	</client-binary-handler>	
+	<client-data>
+		com.quickserverlab.quickcached.Data
+	</client-data>
+
+	<!-- 3 hours - in miliseconds-->
+	<timeout>10800000</timeout>
+
+	<max-connection-msg>SERVER_ERROR Server Busy - Max Connection Reached</max-connection-msg>
+	<timeout-msg>SERVER_ERROR Timeout</timeout-msg>
+	<!-- OR -->
+	<!-- 
+	<client-extended-event-handler>
+		echoserver.EchoExtendedEventHandler
+	</client-extended-event-handler>
+	-->
+
+	<server-mode>
+		<blocking>true</blocking>
+	</server-mode>
+
+	<default-data-mode>
+		<data-type-in>Binary</data-type-in>
+		<data-type-out>Binary</data-type-out>
+	</default-data-mode>	
+
+	<console-logging-level>WARNING</console-logging-level>
+	<console-logging-formatter>
+		org.quickserver.util.logging.SimpleConsoleFormatter
+	</console-logging-formatter>
+
+	<object-pool>
+		<max-active>-1</max-active>
+		<max-idle>50</max-idle>
+		<init-size>20</init-size>
+
+		<thread-object-pool>
+			<max-active>-1</max-active>
+			<max-idle>50</max-idle>
+			<init-size>20</init-size>
+		</thread-object-pool>
+
+		<client-handler-object-pool>
+			<max-active>-1</max-active>
+			<max-idle>50</max-idle>
+			<init-size>30</init-size>
+		</client-handler-object-pool>
+
+		<byte-buffer-object-pool>
+			<max-active>-1</max-active>
+			<max-idle>50</max-idle>
+			<init-size>20</init-size>
+		</byte-buffer-object-pool>
+		
+		<client-data-object-pool>
+			<max-active>-1</max-active>
+			<max-idle>50</max-idle>
+			<init-size>20</init-size>
+		</client-data-object-pool>
+	</object-pool>
+
+	<communication-logging>
+		<enable>false</enable>
+	</communication-logging>	
+
+
+	<application-configuration>
+		<prompt-type>gui</prompt-type>
+		<!--<prompt-type>console</prompt-type>-->
+
+		<property>
+			<property-name>CHARSET_TO_USE</property-name>
+			<property-value>ISO-8859-1</property-value>
+		</property>
+		
+		<property>
+			<property-name>CACHE_IMPL_CLASS</property-name>
+			<!-- com.quickserverlab.quickcached.cache.impl.whirlycott.WhirlycottCacheImpl -->
+			<!-- com.quickserverlab.quickcached.cache.impl.h2database.H2CacheImpl -->
+			<!-- com.quickserverlab.quickcached.cache.impl.directbytebuffer.DirectByteBufferImpl -->
+			<!-- com.quickserverlab.quickcached.cache.impl.concurrenthashmap.ConcurrentHashMapImpl -->
+			<!-- com.quickserverlab.quickcached.cache.impl.softreferencemap.SoftReferenceMapImpl -->
+			
+			<property-value>com.quickserverlab.quickcached.cache.impl.softreferencemap.SoftReferenceMapImpl</property-value>
+		</property>
+
+		<property>
+			<property-name>FLUSH_ON_LOW_MEMORY_PERCENT</property-name>
+			<!-- 0.96 = 96%; will call flush if reached; make it blank to skip this-->
+			<property-value>0.96</property-value>
+		</property>	
+
+		<property>
+			<property-name>GC_CALL_ON_LOW_MEMORY_PERCENT</property-name>
+			<!-- 0.90 = 90%; will call flush if reached; make it blank to skip this-->
+			<property-value>0.90</property-value>
+		</property>	
+		<property>
+			<property-name>GC_CALL_ON_LOW_MEMORY_POLLING_INTERVAL_MIN</property-name>
+			<property-value>5</property-value>
+		</property>
+		
+		<property>
+			<property-name>MEMCACHED_VERSION_TO_SHOW</property-name>
+			<property-value>1.4.13</property-value>
+		</property>	
+		
+		<property>
+			<property-name>SAVE_CACHE_TO_DISK_IF_SUPPORTED_BW_RESTARTS</property-name>
+			<!--
+			Note: Only following implementations support this
+				DirectByteBufferImpl
+				ConcurrentHashMapImpl
+				SoftReferenceMapImpl
+			-->
+			<property-value>false</property-value>
+		</property>
+
+		<property>
+			<property-name>ENABLE_STATS_REPORT</property-name>
+			<property-value>false</property-value>
+		</property>
+		<property>
+			<property-name>STATS_REPORT_WRITE_INTERVAL</property-name>
+			<!-- 60000 = 1m, 900000=15m -->
+			<property-value>900000</property-value>
+		</property>
+		
+		<property>
+			<property-name>SLOW_RESPONSE_LIMIT_MS_STATS</property-name>			
+			<property-value>500</property-value>
+		</property>
+		
+		<property>
+			<property-name>ENTRIES_TO_LOG</property-name>
+			<property-value>datetime,curr_connections,total_connections,bytes_read,bytes,limit_maxbytes,mem_percent_used,curr_items,total_items,cmd_get,cmd_set,cmd_delete,cmd_flush,get_hits,get_misses,delete_misses,delete_hits,gc_calls,slow_res</property-value>
+		</property>
+
+		<property>
+			<property-name>COMPUTE_AVG_FOR_SET_CMD</property-name>
+			<property-value>false</property-value>
+		</property>
+		
+
+	</application-configuration>
+
+	<access-constraint>
+	  <ip-filter> 
+	    <enable>false</enable>
+	    <allow-access>false</allow-access>
+	    <ip-collection>
+		  <client-ip-address>127.0.0.1</client-ip-address> 
+	    </ip-collection>
+	  </ip-filter> 
+	</access-constraint>
+
+	<application-jar-path>../dist/QuickCached-Server.jar</application-jar-path>
+
+		
+	<server-hooks>
+		<class-name>com.quickserverlab.quickcached.SetupLoggingHook</class-name>
+		<class-name>com.quickserverlab.quickcached.PrepareHook</class-name>
+	</server-hooks>
+
+
+	<advanced-settings>
+		<charset>ISO-8859-1</charset>
+		<use-direct-byte-buffer>true</use-direct-byte-buffer>
+		<!--<byte-buffer-size>61440</byte-buffer-size>-->
+		<backlog>1024</backlog>		
+		<socket-linger>-1</socket-linger>
+		<debug-non-blocking-mode>false</debug-non-blocking-mode> 
+
+		<performance-preferences-connection-time>0</performance-preferences-connection-time>
+		<performance-preferences-latency>4</performance-preferences-latency>
+		<performance-preferences-bandwidth>0</performance-preferences-bandwidth>
+
+		<client-socket-tcp-no-delay>true</client-socket-tcp-no-delay>
+		<!-- 10 low latency -->
+		<client-socket-traffic-class>10</client-socket-traffic-class>
+		
+
+		<client-socket-receive-buffer-size>13107</client-socket-receive-buffer-size>
+		<client-socket-send-buffer-size>13107</client-socket-send-buffer-size>
+	</advanced-settings>
+
+	<!--
+	<qsadmin-server>
+		<port>4124</port>
+		<bind-address>127.0.0.1</bind-address>
+
+		<command-shell>
+			<enable>false</enable>
+		</command-shell>
+
+		<communication-logging>
+			<enable>false</enable>
+		</communication-logging>
+
+		<server-mode>
+			<blocking>false</blocking>
+		</server-mode>
+
+		<access-constraint>
+		  <ip-filter> 
+			<enable>false</enable>
+			<allow-access>true</allow-access>
+			<ip-collection>
+			  <client-ip-address>127.0.0.1</client-ip-address> 
+			 <client-ip-address>192.168.1.100</client-ip-address>
+			</ip-collection>
+		  </ip-filter> 
+		</access-constraint> 
+	</qsadmin-server>
+	-->
+</quickserver>

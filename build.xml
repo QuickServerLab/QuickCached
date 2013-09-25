@@ -1,0 +1,226 @@
+
+<project name="QuickCached.Project" default="all" basedir=".">
+	<property name="app.name"   value="QuickCached" />
+	<property name="build.dir"  value="build" />
+	<property name="main.build.dir"  value="build/mainclasses" />
+	<property name="test.build.dir"  value="build/testcases" />
+	<property name="client.build.dir"  value="build/clientcases" />
+	<property name="dist.dir"   value="dist" />
+	<property name="flag.debug"   value="true" />
+
+	<target name="clean">
+		<!--delete dir="${build.dir}" /-->
+		<delete dir="${main.build.dir}" />
+		<delete dir="${test.build.dir}" />
+		<delete dir="${client.build.dir}" />
+	</target>
+
+	<path id="project.classpath">
+		<fileset dir="./lib/">
+			<include name="**/*.jar"/>
+		</fileset>		
+	</path>
+	<path id="project.classpath.client">
+		<fileset dir="./libtest/">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="./dist/">
+			<include name="**/QuickCached-Client.jar"/>
+		</fileset>		
+	</path>
+
+	<!-- main jar -->
+	<target name="main_compile"  depends="clean">
+		<mkdir dir="${main.build.dir}"/>
+		<javac srcdir="src/main/" destdir="${main.build.dir}" debug="${flag.debug}" 
+				deprecation="on" optimize="on" includeantruntime="false" source="1.5" target="1.5">
+			<include name="**/*.java"/>
+			<classpath refid="project.classpath"/>
+		</javac>
+	</target>
+
+	<target name="main_jar" depends="main_compile">
+		<mkdir dir="${dist.dir}"/>
+		<copy file="lib/impl/whirlycache/whirlycache.xml" todir="${main.build.dir}" overwrite="yes" />
+		<jar jarfile="${dist.dir}/${app.name}-Server.jar"
+			basedir="${main.build.dir}" includes="**" manifest="src/QuickCached.MF"/>
+	</target>
+	<!-- main jar -->
+	
+	<!-- client jar -->
+	<target name="client_compile"  depends="clean">
+		<mkdir dir="${client.build.dir}"/>
+		<javac srcdir="src/client/" destdir="${client.build.dir}" debug="${flag.debug}" 
+				deprecation="on" optimize="on" includeantruntime="false" source="1.5" target="1.5">
+			<include name="**/*.java"/>
+			<classpath refid="project.classpath.client"/>
+		</javac>
+	</target>
+
+	<target name="client_jar" depends="client_compile">
+		<mkdir dir="${dist.dir}"/>
+		<jar jarfile="${dist.dir}/${app.name}-Client.jar"
+			basedir="${client.build.dir}" includes="**" />
+	</target>
+	<!-- client jar -->
+
+	<target name="run" depends="main_jar">
+		<java fork="yes" classname="com.quickserverlab.quickcached.QuickCached"
+            taskname="QuickCached" failonerror="true">
+			<arg line="-l 127.0.0.1 -p 11211"/>
+			<classpath refid="project.classpath"/>
+			<classpath>
+				<fileset dir="dist">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+	
+	<target name="jar" depends="main_jar, client_jar" />
+
+	<target name="all" depends="jar, compileTests" />
+
+	<!-- junit task -->
+	<path id="project.classpath.test">
+		<fileset dir="libtest">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${test.build.dir}" >
+			<include name="*.class"/>
+		</fileset>
+		<fileset dir="./dist/">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="compileTests">
+		<mkdir dir="${test.build.dir}"/>
+		<javac srcdir="src/test/" destdir="${test.build.dir}" 
+				includeantruntime="false"  debug="${flag.debug}"  source="1.5" target="1.5">
+			<classpath refid="project.classpath.test"/>
+			<include name="**/*.java"/>
+		</javac>
+	</target>
+
+	<target name="test" depends="compileTests">
+		<java fork="yes" classname="junit.textui.TestRunner"
+            taskname="junit" failonerror="true">
+			<arg value="com.quickserverlab.quickcached.AllJUnitTests"/>
+			<classpath refid="project.classpath.test"/>
+			<classpath>
+				<pathelement location="${test.build.dir}" />
+				<fileset dir="libtest">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+			
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="SpyMemcached" /-->
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="XMemcached" /-->
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="QuickCached" /-->
+			<sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="QuickCached" />
+		</java>
+	</target>
+	<!-- junit task -->
+	
+	<target name="loadtest" depends="compileTests">
+		<java fork="yes" classname="com.quickserverlab.quickcached.load.LoadTest"
+            taskname="loadtest" failonerror="true">
+			<arg line="m 20 127.0.0.1:11211,127.0.0.1:11212 1000"/>
+			<!--arg line="m 10 127.0.0.1:11211,127.0.0.1:11212 100"/-->
+			
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="SpyMemcached" /-->
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="XMemcached" /-->
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="QuickCached" /-->
+				   
+			<sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="QuickCached" />
+				   
+			<sysproperty key="com.quickserverlab.quickcached.client.binaryConnection"
+                   value="false" />			
+				   
+			<classpath refid="project.classpath.test"/>
+			<classpath>
+				<pathelement location="${test.build.dir}" />
+				<fileset dir="libtest">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+	
+	
+	<target name="warmup" depends="compileTests">
+		<java fork="yes" classname="com.quickserverlab.quickcached.load.LoadTest"
+            taskname="warmup" failonerror="true">
+			<arg line="m 20 127.0.0.1:11211 100"/>
+			<!--arg line="m 20 127.0.0.1:11211,127.0.0.1:11212 100"/-->
+			
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="SpyMemcached" /-->
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="XMemcached" /-->
+			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="QuickCached" /-->
+			<sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
+                   value="QuickCached" />
+			
+			<sysproperty key="com.quickserverlab.quickcached.client.binaryConnection"
+                   value="true" />
+				   
+			<classpath refid="project.classpath.test"/>
+			<classpath>
+				<pathelement location="${test.build.dir}" />
+				<fileset dir="libtest">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
+	<target name="agetest" depends="compileTests">
+		<java fork="yes" classname="com.quickserverlab.quickcached.load.AgeTest"
+            taskname="AgeTest" failonerror="true">
+			<!-- 3600 ~ 1h -->
+			<!-- 10800 ~ 3h -->
+			<arg line="10 127.0.0.1:11211,127.0.0.1:11212 16 10800" />
+			<!--arg line="10 127.0.0.1:11211,127.0.0.1:11212 16 10800" /-->
+			<!--arg line="thread list txn/sec runtimesec"/-->
+			
+			<sysproperty key="com.quickserverlab.quickcached.client.binaryConnection"
+                   value="true" />
+			<classpath refid="project.classpath.test"/>
+			<classpath>
+				<pathelement location="${test.build.dir}" />
+				<fileset dir="libtest">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
+
+	<target name="loadmemtestMem" depends="compileTests">
+		<java fork="yes" classname="com.quickserverlab.quickcached.protocol.LoadMemTest"
+            taskname="loadmemtestMem" failonerror="true">
+			<arg line="m 10 127.0.0.1:11211 500000"/>
+			<!--arg line="s 1 127.0.0.1:11211 10000"/-->
+			<classpath refid="project.classpath.test"/>
+			<classpath>
+				<pathelement location="${test.build.dir}" />
+				<fileset dir="libtest">
+					<include name="**/*.jar"/>
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
+</project>
+

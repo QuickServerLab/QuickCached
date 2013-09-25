@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: com.quickserverlab.quickcached.QuickCached
+Class-Path: ./../lib/log4j.jar ./../lib/QuickServer.jar ./../lib/impl/whirlycache/whirlycache-1.0.1.jar ./../lib/impl/whirlycache/concurrent.jar ./../lib/impl/h2/h2-1.3.155.jar

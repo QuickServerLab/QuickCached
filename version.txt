@@ -1,0 +1,71 @@
+Version History for QuickCached
+--------------------------------
+
+Current Version: 2.0.0 RC1 
+
+
+version 2.0.0 [20-Oct-2012]
+---------------------------
++ Added QuickCached Client
++ Added slow res in stats
+
+
+version 2.0.0 RC1 [20-Oct-2012]
+---------------------------
++ Added Touch command in Text Interface.
++ Added Touch, GAT, GATQ  command in Binary Interface.
++ Implemented alternate cache impl using SoftReference in a ConcurrentHashMap (now default)
++ Added support for saving state b/w re-start (by default this is turned off.. see xml)
+- Removed -Xconcurrentio from jvm flags
+! Bug fixes
+# Improved concurrency, cache update handling
+
+
+version 1.1.0 [11-Sep-2011]
+---------------------------
++ Upgraded to QuickServer 1.4.8
++ Implemented alternate cache impl using h2databased in-memory database
++ Implemented alternate cache impl using Direct ByteBuffer
++ Implemented alternate cache impl using ConcurrentHashMap
++ Implemented client abstraction for using XMemcached and SpyMemcached client API
+# Improved cache for better input stream handling.
+! Bug fix for CAS in set (Binary Mode only)
++ Added application version, memory percent used in stats output
++ We have configurable Memcached version to output to client
++ Added Stats Report support to log stats output to a csv file at a interval specified
++ Added support to check for low memory and call GC if required
++ Added support for computing set averages - keysize, value size and ttl
+  (needs to be turned on in xml)
+# parametrized charset - defaults to ISO-8859-1
+# Network performance is now tuned
+
+
+version 1.0.2 [19-Feb-2011]
+---------------------------
++ Add, Replace, Append, Prepend, CAS, Increment, Decrement commands now supported.
++ Flush All with delay is also supported now.
+# Added 3hour socket timeout by default
++ Monitors JVM memory and will trigger flush_all if it reached 95% usage (configrable in xml) 
+
+
+version 1.0.1 [19-Feb-2011]
+---------------------------
+! Bug fixes for stats, verison and get command
+! Bug fixes for CLI and logging
+
+
+version 1.0.0 [26-Jan-2011]
+---------------------------
++ Added support for TCP Port
++ Added support Text and Binary  Protocol
++ Commands implemented:  
+    set, setq
+    get, getq  
+    delete, deleteq
+    flush
+    no-op or noop
+    version (not yet fully working)
+    stats (not yet fully working)
++ Supports CLI
++ Supports plug-able cache implementation.  
++ Comes with WhirlycottCache implementation 
