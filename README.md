@@ -1,8 +1,6 @@
 
-QuickCached 2.0.0
-
-Introduction
----------------------
+QuickCached
+------------
 QuickCached is a pure Java implementation of Memcached server based on QuickServer. It is a open source, high-performance, distributed memory object caching system, generic in nature, but intended for use in speeding up dynamic web applications by alleviating database load.
 
 QuickCached is an in-memory key-value store for small chunks of arbitrary data (strings, objects) from results of database calls, API calls, or page rendering.
@@ -10,11 +8,10 @@ QuickCached is an in-memory key-value store for small chunks of arbitrary data (
 QuickCached is simple yet powerful. Its simple design promotes quick deployment, ease of development, and solves many problems facing large data caches. 
 
 
-
 Website
 ---------------------
-http://www.quickcached.org/
-http://code.google.com/p/quickcached/
+ * http://www.quickcached.org/
+ * http://code.google.com/p/quickcached/
 
 
 
@@ -67,7 +64,7 @@ JUnit :
  A framework to write repeatable tests. 
 
 
-Date: 11 Sep 2011
+Date: 20 Oct 2012
 ---------------------
 
 Copyright (C) 2011-2013 QuickServer Lab
