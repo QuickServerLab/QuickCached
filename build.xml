@@ -51,7 +51,7 @@
 	<target name="client_compile"  depends="clean">
 		<mkdir dir="${client.build.dir}"/>
 		<javac srcdir="src/client/" destdir="${client.build.dir}" debug="${flag.debug}" 
-				deprecation="on" optimize="on" includeantruntime="false" source="1.5" target="1.5">
+				deprecation="on" optimize="off" includeantruntime="false" source="1.5" target="1.5">
 			<include name="**/*.java"/>
 			<classpath refid="project.classpath.client"/>
 		</javac>
