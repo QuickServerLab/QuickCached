@@ -46,8 +46,10 @@ import org.quickserver.net.client.pool.PooledBlockingClient;
  */
 public class QuickCachedClientImpl extends MemcachedClient {
 	private static final Logger logger = Logger.getLogger(QuickCachedClientImpl.class.getName());
-	protected static final int FLAGS_GENRIC_STRING = 0;
+	
+    protected static final int FLAGS_GENRIC_STRING = 0;
 	protected static final int FLAGS_GENRIC_OBJECT = 1;
+        
 	protected static String charset = "ISO-8859-1";//"utf-8";
 	private String hostList;
 	private boolean binaryConnection = false;
@@ -1104,7 +1106,7 @@ public class QuickCachedClientImpl extends MemcachedClient {
 			}
 
 			if (res.equals("NOT_FOUND")) {
-				boolean flag = add(key, ttlSec, defaultValue, timeoutMiliSec);
+				boolean flag = add(key, ttlSec, ""+defaultValue, timeoutMiliSec);
 				if(flag==false) {
 					throw new MemcachedException("add failed "+key);
 				}
@@ -1159,7 +1161,7 @@ public class QuickCachedClientImpl extends MemcachedClient {
 			}
 
 			if (res.equals("NOT_FOUND")) {
-				add(key, ttlSec, defaultValue, timeoutMiliSec);
+				add(key, ttlSec, ""+defaultValue, timeoutMiliSec);
 				return defaultValue;
 			}
 
