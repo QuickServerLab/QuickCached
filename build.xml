@@ -115,6 +115,10 @@
 				</fileset>
 			</classpath>
 			
+			
+			<sysproperty key="com.quickserverlab.quickcached.server_list"
+                   value="localhost:11211" />			
+						
 			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
                    value="SpyMemcached" /-->
 			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"

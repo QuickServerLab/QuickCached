@@ -19,7 +19,11 @@ public class BinaryProtocolTest extends ProtocolTest {
 		try {
 			c = MemcachedClient.getInstance();
 			c.setUseBinaryConnection(true);
-			c.setAddresses("localhost:11211");
+			
+			String serverList = System.getProperty(
+				"com.quickserverlab.quickcached.server_list", "localhost:11211");			
+			c.setAddresses(serverList);
+			
 			c.setDefaultTimeoutMiliSec(3000);//3 sec
 			c.setConnectionPoolSize(1);
 			c.init();
