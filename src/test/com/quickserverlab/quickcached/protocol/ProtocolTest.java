@@ -10,6 +10,13 @@ import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 import com.quickserverlab.quickcached.client.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 /**
  *
@@ -52,7 +59,6 @@ public class ProtocolTest extends TestCase  {
 		assertNotNull(readTestObject);
 		assertEquals(testObject.getName(),  readTestObject.getName());
 		
-	
 		//4 - no reply
 		Object client = c.getBaseClient();
 		key = "testget4";
@@ -77,6 +83,116 @@ public class ProtocolTest extends TestCase  {
 		
 	}
 
+	public void testGetBulk() throws TimeoutException, MemcachedException {
+		String readObject = null;
+		int numberOfKeys = 10;
+		String key = null;
+		String value = null;
+		
+		Map<String, Object> testRequest = new HashMap<String, Object>();
+		ArrayList<String> testKeys = new ArrayList<String>();
+		
+		for (int i = 0; i < numberOfKeys; i++) {
+			key = "key" + System.nanoTime();
+			value = "val" + System.nanoTime();
+
+			c.set(key, 3600, value);
+			testRequest.put(key, value);
+			testKeys.add(key);
+			
+			//Confirm insertion
+			readObject = (String) c.get(key);
+			assertNotNull(readObject);
+			assertEquals(value,  readObject);
+		}
+		
+		try {
+			int resultCount = 0;
+            Map<String, Object> testResult = c.getBulk(testKeys);
+			for(String keys : testKeys){
+				resultCount++;
+				assertEquals(testRequest.get(keys),  testResult.get(keys));
+			}
+			assertEquals(resultCount,  numberOfKeys);
+        } catch (Exception e) {
+            e.printStackTrace();
+			assertFalse("Exception occured in get bulk", true);
+        }
+		
+	}
+
+	public void testGets() throws TimeoutException, MemcachedException {
+		String readObject = null;
+		String key = "testGetCAS";
+		String value = "Value";
+		
+		long casVal = 1; //default cas value is 1, and increments on each set
+		
+		c.set(key, 3600, value);
+		CASValue casResult = c.gets(key, 1000);
+		
+		assertNotNull(casResult);
+		assertEquals(casResult.getValue(), value);
+		assertEquals(casResult.getCas(), casVal);
+		
+		casVal++;
+		value = "Value2";
+		
+		c.set(key, 3600, value);
+		CASValue casResult2 = c.gets(key, 1000);
+		
+		assertNotNull(casResult2);
+		assertEquals(casResult2.getValue(), value);
+		assertEquals(casResult2.getCas(), casVal);
+	}
+	
+	public void testCAS() throws TimeoutException, MemcachedException {
+		String key = "testcas1";
+		
+		
+		Object client = c.getBaseClient();
+		if(client instanceof net.rubyeye.xmemcached.MemcachedClient) {
+			//ERROR
+			CASResponse testRslt1 = c.cas(key, "value", 3000, 1);
+			assertNotNull(testRslt1);
+			assertEquals(CASResponse.ERROR,  testRslt1);
+
+			String result = (String)c.get(key);
+			assertNull(result);
+		} else if (client instanceof com.quickserverlab.quickcached.client.impl.QuickCachedClientImpl) {			
+			//NOT_FOUND
+			CASResponse testRslt1 = c.cas(key, "value", 3000, 1);
+			assertNotNull(testRslt1);
+			assertEquals(CASResponse.NOT_FOUND,  testRslt1);
+
+			String result = (String)c.get(key);
+			assertNull(result);
+		}
+		
+		c.set(key, 3000, "value");
+		//Default value of cas is 1
+		CASResponse testRslt2 = c.cas(key, "value2", 3000, 1);
+		assertNotNull(testRslt2);
+		assertEquals(CASResponse.OK,  testRslt2);
+		
+		//Increment the cas, it should match the current cas, so saving current CAS
+		CASResponse testRslt3 = c.cas(key, "value2", 3000, 2);
+		assertNotNull(testRslt3);
+		assertEquals(CASResponse.OK,  testRslt3);
+		
+		if(client instanceof net.rubyeye.xmemcached.MemcachedClient) {
+			//Increment the cas, passing wrong CAS value, expecting rslt as "ERROR"
+			CASResponse testRslt4 = c.cas(key, "value3", 3000, 6);
+			assertNotNull(testRslt4);
+			assertEquals(CASResponse.ERROR,  testRslt4);
+		} else if (client instanceof com.quickserverlab.quickcached.client.impl.QuickCachedClientImpl) {			
+			//Increment the cas, passing wrong CAS value, expecting rslt as "EXISTS"
+			CASResponse testRslt4 = c.cas(key, "value3", 3000, 6);
+			assertNotNull(testRslt4);
+			assertEquals(CASResponse.EXISTS,  testRslt4);
+		}
+	}
+	
 	public void testAppend() throws TimeoutException, MemcachedException {
 		String readObject = null;
 		String key = null;
