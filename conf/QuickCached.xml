@@ -154,6 +154,15 @@
 			<property-value>false</property-value>
 		</property>
 		
+		
+		<property>
+			<property-name>MAX_SIZE_FOR_KEY</property-name>
+			<property-value>250</property-value>
+		</property>
+		<property>
+			<property-name>MAX_SIZE_FOR_VALUE_IN_MB</property-name>
+			<property-value>5</property-value>
+		</property>
 
 	</application-configuration>
 

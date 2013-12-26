@@ -254,6 +254,8 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 								+ rh.getExtrasLength() + binaryPacket.getValue().length);
 
 							binaryCommandProcessor.sendResponse(handler, binaryPacket);
+							handler.closeConnection();
+							break;
 						} catch (CacheException e) {
 							logger.log(Level.WARNING, "Error[ce]: " + e, e);
 
@@ -296,10 +298,16 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 							textCommandProcessor.handleTextCommand(handler, cmd);
 						} catch (IllegalArgumentException e) {
 							logger.log(Level.WARNING, "Error in text command [iae]: " + e, e);
-							textCommandProcessor.sendResponse(handler, "CLIENT_ERROR " + e.getMessage() + "\r\n");
+							textCommandProcessor.sendResponse(handler, 
+								"CLIENT_ERROR " + e.getMessage() + "\r\n");
+							handler.closeConnection();
+							break;
 						} catch (CacheException e) {
 							logger.log(Level.WARNING, "Error in text command [ce]: " + e, e);
-							textCommandProcessor.sendResponse(handler, "SERVER_ERROR " + e.getMessage() + "\r\n");
+							textCommandProcessor.sendResponse(handler, 
+								"SERVER_ERROR " + e.getMessage() + "\r\n");
+							handler.closeConnection();
+							break;
 						} finally {
 							long end = System.currentTimeMillis();
 							long timeTaken = end - start;

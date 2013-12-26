@@ -22,6 +22,9 @@ public class Data implements ClientData {
 	private boolean noreplay;
 	
 	private int client_mode = -1;//0-text,1=binary
+	
+	private static long maxSizeAllowedForValue;
+	private static int maxSizeAllowedForKey;
 
 	public String getCommand() throws UnsupportedEncodingException {
 		byte input[] = baos.toByteArray();
@@ -78,7 +81,25 @@ public class Data implements ClientData {
 		byte headerData[] = new byte[24];
 		System.arraycopy(input, 0, headerData, 0, 24);
 		RequestHeader header = RequestHeader.parse(headerData);
-
+		
+		//saftey check
+		if(header.getKeyLength()>getMaxSizeAllowedForKey()) {
+			throw new IllegalArgumentException(
+					"key passed to big to store "+key);
+		}
+		
+		long bodySize = header.getTotalBodyLength() - 
+			(header.getExtrasLength() + header.getKeyLength());
+		if(bodySize>0) {
+			if(Data.getMaxSizeAllowedForValue()>0) {
+				if(bodySize > Data.getMaxSizeAllowedForValue()) {
+					throw new IllegalArgumentException(
+						"value passed is too big to store "+bodySize);
+				}
+			}
+		}
+		//saftey check
+		
 		int lenToRead = header.getTotalBodyLength();
 		if(baos.size()<(24+lenToRead)) {
 			//todo may be it not good idea to descard parsed header
@@ -194,6 +215,34 @@ public class Data implements ClientData {
 
 	public String getCasUnique() {
 		return casunique;
+	}
+
+	/**
+	 * @return the maxSizeAllowedForValue
+	 */
+	public static long getMaxSizeAllowedForValue() {
+		return maxSizeAllowedForValue;
+	}
+
+	/**
+	 * @param aMaxSizeAllowedForValue the maxSizeAllowedForValue to set
+	 */
+	public static void setMaxSizeAllowedForValue(long aMaxSizeAllowedForValue) {
+		maxSizeAllowedForValue = aMaxSizeAllowedForValue;
+	}
+
+	/**
+	 * @return the maxSizeAllowedForKey
+	 */
+	public static int getMaxSizeAllowedForKey() {
+		return maxSizeAllowedForKey;
+	}
+
+	/**
+	 * @param aMaxSizeAllowedForKey the maxSizeAllowedForKey to set
+	 */
+	public static void setMaxSizeAllowedForKey(int aMaxSizeAllowedForKey) {
+		maxSizeAllowedForKey = aMaxSizeAllowedForKey;
 	}
 }
 

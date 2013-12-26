@@ -13,7 +13,6 @@ public class QuickCached {
 	
     public static String version = "2.0.0";
     public static boolean DEBUG = false;
-    private static final int KEY_MAX_LENGTH = 250;
 	private static QuickServer quickcached;
 
     public static void main(String args[]) throws Exception {

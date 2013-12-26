@@ -381,6 +381,18 @@ public class TextCommandProcessor {
 				}
 			}
 		}
+		
+		if(key.length()>Data.getMaxSizeAllowedForKey()) {
+			throw new IllegalArgumentException(
+					"key passed to big to store "+key);
+		}
+		
+		if(Data.getMaxSizeAllowedForValue()>0) {
+			if(bytes > Data.getMaxSizeAllowedForValue()) {
+				throw new IllegalArgumentException(
+					"value passed to big to store "+bytes+" for key "+key);
+			}
+		}
 
 		data.setCmd(cmd);
 		data.setKey(key);

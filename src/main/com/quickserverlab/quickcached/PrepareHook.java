@@ -32,6 +32,22 @@ public class PrepareHook implements ServerHook {
 			}
 
 			try {
+				String maxSizeForKey = (String) config.get("MAX_SIZE_FOR_KEY");
+				if(maxSizeForKey!=null && maxSizeForKey.trim().length()!=0) {
+					int maxSize = Integer.parseInt(maxSizeForKey);
+					Data.setMaxSizeAllowedForKey(maxSize);
+				} else {
+					Data.setMaxSizeAllowedForKey(250);
+				}
+				
+				String maxSizeForValueInMB = (String) config.get("MAX_SIZE_FOR_VALUE_IN_MB");
+				if(maxSizeForValueInMB!=null && maxSizeForValueInMB.trim().length()!=0) {
+					long maxSize = Long.parseLong(maxSizeForValueInMB);
+					Data.setMaxSizeAllowedForValue(maxSize*1024*1024);
+				} else {
+					Data.setMaxSizeAllowedForValue(5*1024*1024);
+				}
+				
 				String charsetToUse = (String) config.get("CHARSET_TO_USE");
 				if(charsetToUse!=null && charsetToUse.trim().length()!=0) {
 					HexUtil.setCharset(charsetToUse);
