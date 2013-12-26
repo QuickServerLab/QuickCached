@@ -8,6 +8,9 @@ version 2.0.0 [20-Oct-2012]
 ---------------------------
 + Added QuickCached Client
 + Added slow res in stats
++ Server: Added support to configure max key size (default: 250)
++ Server: Added support to configure max value size (default: 6MB)
+# Modified server to close connection when bad req (with invalid parameters) received (to prevent bad processing of data)
 
 
 version 2.0.0 RC1 [20-Oct-2012]

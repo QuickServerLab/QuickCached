@@ -10,6 +10,9 @@ import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 import com.quickserverlab.quickcached.client.*;
+import com.quickserverlab.quickcached.client.impl.QuickCachedClientImpl;
+import com.quickserverlab.quickcached.client.impl.SpyMemcachedImpl;
+import com.quickserverlab.quickcached.client.impl.XMemcachedImpl;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +20,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import net.rubyeye.xmemcached.XMemcachedClient;
 
 /**
  *
@@ -642,5 +646,208 @@ public class ProtocolTest extends TestCase  {
 		}
 		
 	}
+	
+	
+	public void testBigKey250() throws TimeoutException, MemcachedException {
+		String readObject = null;
+		String key = null;
+		
+		StringBuilder keyPrefix = new StringBuilder();
+		for(int i=0;i<249;i++) {
+			keyPrefix.append("k");
+		}
+		
+		//1 - String
+		key = keyPrefix.toString()+"1";
+		c.set(key, 3600, "World");
+		readObject = (String) c.get(key);
+		
+		assertNotNull(readObject);
+		assertEquals("World",  readObject);
+    
+		//2 - native obj
+        Date value = new Date();
+		key = keyPrefix.toString()+"2";
+		c.set(key, 3600, value);
+		Date readObjectDate = (Date) c.get(key);
 
+		assertNotNull(readObjectDate);
+		assertEquals(value.getTime(),  readObjectDate.getTime());
+		
+		//3 - custom obj
+        TestObject testObject = new TestObject();
+		testObject.setName(key);
+		key = keyPrefix.toString()+"3";
+		c.set(key, 3600, testObject);
+		TestObject readTestObject = (TestObject) c.get(key);
+
+		assertNotNull(readTestObject);
+		assertEquals(testObject.getName(),  readTestObject.getName());
+		
+		//4 - no reply
+		Object client = c.getBaseClient();
+		key = keyPrefix.toString()+"4";
+		if(client instanceof net.rubyeye.xmemcached.MemcachedClient) {
+			net.rubyeye.xmemcached.MemcachedClient xmc = 
+				(net.rubyeye.xmemcached.MemcachedClient) client;
+			
+			try {
+				xmc.setWithNoReply(key, 3600, "World");			
+			} catch (InterruptedException ex) {
+				Logger.getLogger(ProtocolTest.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (net.rubyeye.xmemcached.exception.MemcachedException ex) {
+				Logger.getLogger(ProtocolTest.class.getName()).log(Level.SEVERE, null, ex);
+			} 			
+			readObject = (String) c.get(key);
+			assertNotNull(readObject);
+			assertEquals("World",  readObject);
+		} else if (client instanceof net.spy.memcached.MemcachedClient) {
+			net.spy.memcached.MemcachedClient smc = (net.spy.memcached.MemcachedClient) client;
+			
+			//does not support noreply
+		}		
+	}
+	
+	public void testBigKey251() throws TimeoutException, MemcachedException {
+		if(c instanceof QuickCachedClientImpl) {
+			c.setMaxSizeAllowedForKey(-1);
+		}
+		
+		String readObject = null;
+		String key = null;
+		
+		StringBuilder keyPrefix = new StringBuilder();
+		for(int i=0;i<250;i++) {
+			keyPrefix.append("k");
+		}
+		
+		//1 - String
+		key = keyPrefix.toString()+"1";
+		try {
+			c.set(key, 3600, "World");
+			
+			assertTrue(
+				"This should not have passed.. we should have got a exception"
+				, false);
+		} catch(Exception e) {
+			assertTrue("We are good", true);
+		}
+		
+    
+		//2 - native obj
+        Date value = new Date();
+		key = keyPrefix.toString()+"2";
+		try {
+			c.set(key, 3600, value);
+			assertTrue(
+				"This should not have passed.. we should have got a exception"
+				, false);
+		} catch(Exception e) {
+			assertTrue("We are good", true);
+		}
+		
+		//3 - custom obj
+        TestObject testObject = new TestObject();
+		testObject.setName(key);
+		key = keyPrefix.toString()+"3";
+		try {
+			c.set(key, 3600, testObject);
+			assertTrue(
+				"This should not have passed.. we should have got a exception"
+				, false);
+		} catch(Exception e) {
+			assertTrue("We are good", true);
+		}
+		
+		//4 - no reply
+		Object client = c.getBaseClient();
+		key = keyPrefix.toString()+"4";
+		if(client instanceof net.rubyeye.xmemcached.MemcachedClient) {
+			net.rubyeye.xmemcached.MemcachedClient xmc = 
+				(net.rubyeye.xmemcached.MemcachedClient) client;
+			
+			try {
+				xmc.setWithNoReply(key, 3600, "World");			
+				
+				assertTrue(
+					"This should not have passed.. we should have got a exception"
+					, false);
+			} catch (InterruptedException ex) {
+				Logger.getLogger(ProtocolTest.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (Exception ex) {
+				assertTrue("We are good", true);
+			} 	
+		} else if (client instanceof net.spy.memcached.MemcachedClient) {
+			net.spy.memcached.MemcachedClient smc = 
+				(net.spy.memcached.MemcachedClient) client;
+			
+			//does not support noreply
+		}		
+	}
+	
+	public void testBigData5MB() throws TimeoutException, MemcachedException {
+		String readObject = null;
+		String key = null;
+		
+		StringBuilder keyPrefix = new StringBuilder("testget");
+		
+		StringBuilder valuePrefix = new StringBuilder();
+		
+		int mb5 = 1024*1024*5;
+		for(int i=0;i<mb5;i++) {
+			valuePrefix.append("v");
+		}
+		
+		//1 - String
+		key = keyPrefix.toString()+"1";
+		c.set(key, 3600,valuePrefix.toString());
+		readObject = (String) c.get(key);
+		
+		assertNotNull(readObject);
+		assertEquals(valuePrefix.toString(),  readObject);
+  	
+	}
+	
+	public void testBigData6MB() throws TimeoutException, MemcachedException {
+		if(c instanceof QuickCachedClientImpl) {
+			c.setMaxSizeAllowedForValue(-1);
+		} else if(c instanceof XMemcachedImpl) {
+			//does not send the command to server at all for large value
+			//todo verify this
+			return;
+		} else if(c instanceof SpyMemcachedImpl) {
+			//does not send the command to server at all for large value
+			//todo verify this
+			return;
+		} 
+		
+		String readObject = null;
+		String key = null;
+		
+		StringBuilder keyPrefix = new StringBuilder("testget");
+		
+		StringBuilder valuePrefix = new StringBuilder();
+		
+		int mb5 = 1024*1024*6;
+		for(int i=0;i<mb5;i++) {
+			valuePrefix.append("v");
+		}
+		
+		//1 - String
+		key = keyPrefix.toString()+"1";
+		try {
+			c.set(key, 3600, valuePrefix.toString());
+			
+			readObject = (String) c.get(key);
+		
+			assertNotNull(readObject);
+			assertEquals(valuePrefix.toString(),  readObject);
+			
+			assertTrue(
+				"This should not have passed.. we should have got a exception"
+				, false);
+		} catch(Exception e) {
+			assertTrue("We are good", true);
+		}
+	}
 }
