@@ -4,13 +4,17 @@ Version History for QuickCached
 Current Version: 2.0.0 RC1 
 
 
-version 2.0.0 [20-Oct-2012]
+version 2.0.0 [??]
 ---------------------------
 + Added QuickCached Client
 + Added slow res in stats
 + Server: Added support to configure max key size (default: 250)
 + Server: Added support to configure max value size (default: 6MB)
-# Modified server to close connection when bad req (with invalid parameters) received (to prevent bad processing of data)
+# Server: Modified server to close connection when bad req 
+  (with invalid parameters) received (to prevent bad processing of data)
++ Client: Added support to configure max key size (default: 250)
++ Client: Added support to configure max value size (default: 6MB)
+
 
 
 version 2.0.0 RC1 [20-Oct-2012]
