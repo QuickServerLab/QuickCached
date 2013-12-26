@@ -213,8 +213,8 @@ public class AgeTest {
 		String value = name+"-"+(i*2)+"-"+largeData;
 		try {
 			c.set(key, 3600, value);
-		} catch (TimeoutException ex) {
-			Logger.getLogger(AgeTest.class.getName()).log(Level.SEVERE, null, ex);
+		} catch (Exception ex) {
+			Logger.getLogger(AgeTest.class.getName()).log(Level.SEVERE, "Error: "+ex, ex);
 		} 
 	}
 

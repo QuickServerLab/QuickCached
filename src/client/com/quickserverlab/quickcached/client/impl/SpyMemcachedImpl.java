@@ -94,7 +94,7 @@ public class SpyMemcachedImpl extends MemcachedClient {
 	}
 			
 	public void set(String key, int ttlSec, Object value, long timeoutMiliSec) 
-			throws TimeoutException {
+			throws TimeoutException, MemcachedException {
 		Future <Boolean> f = getCache().set(key, ttlSec, value);
 		Boolean flag = false;
 		try {
@@ -102,7 +102,7 @@ public class SpyMemcachedImpl extends MemcachedClient {
 		} catch(Exception e) {
 			f.cancel(false);
 			throw new TimeoutException("Timeout "+e);
-		}
+		} 
 	}
 	
 	public boolean add(String key, int ttlSec, Object value, long timeoutMiliSec) 

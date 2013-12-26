@@ -347,7 +347,8 @@ public class QuickCachedClientImpl extends MemcachedClient {
 		}
 	}
 
-	public void set(String key, int ttlSec, Object value, long timeoutMiliSec) throws TimeoutException {
+	public void set(String key, int ttlSec, Object value, long timeoutMiliSec) 
+			throws TimeoutException, MemcachedException {
 		try {
 			StringBuilder sb = new StringBuilder();
 
@@ -362,6 +363,9 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				valueBytes = getObjectBytes(value);
 				flag = FLAGS_GENRIC_OBJECT;
 			}
+			
+			validateKey(key);
+			validateValue(key, valueBytes);
 
 			//<command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 			sb.append("set ").append(key).append(" ").append(flag);
@@ -376,9 +380,11 @@ public class QuickCachedClientImpl extends MemcachedClient {
 			}
 
 			if (res.equals("STORED") == false) {
-				throw new TimeoutException(key + " was not stored[" + res + "]");
+				throw new MemcachedException(key + " was not stored[" + res + "]");
 			}
 		} catch (TimeoutException ex) {
+			throw ex;
+		} catch (MemcachedException ex) {
 			throw ex;
 		} catch (Exception ex) {
 			throw new TimeoutException("We had error " + ex);
@@ -401,6 +407,9 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				valueBytes = getObjectBytes(value);
 				flag = FLAGS_GENRIC_OBJECT;
 			}
+			
+			validateKey(key);
+			validateValue(key, valueBytes);
 
 			//<command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 			sb.append("add ").append(key).append(" ").append(flag);
@@ -442,6 +451,9 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				valueBytes = getObjectBytes(value);
 				flag = FLAGS_GENRIC_OBJECT;
 			}
+			
+			validateKey(key);
+			validateValue(key, valueBytes);
 
 			//<command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 			sb.append("replace ").append(key).append(" ").append(flag);
@@ -483,6 +495,9 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				valueBytes = getObjectBytes(value);
 				flag = FLAGS_GENRIC_OBJECT;
 			}
+			
+			validateKey(key);
+			validateValue(key, valueBytes);
 
 			//<command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 			sb.append("append ").append(key).append(" ").append(flag);
@@ -529,6 +544,9 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				valueBytes = getObjectBytes(value);
 				flag = FLAGS_GENRIC_OBJECT;
 			}
+			
+			validateKey(key);
+			validateValue(key, valueBytes);
 
 			//<command name> <key> <flags> <exptime> <bytes> [noreply]\r\n
 			sb.append("prepend ").append(key).append(" ").append(flag);
@@ -560,7 +578,10 @@ public class QuickCachedClientImpl extends MemcachedClient {
 	}
 
 	public Object get(String key, long timeoutMiliSec)
-		throws MemcachedException, TimeoutException {
+			throws MemcachedException, TimeoutException {
+		
+		validateKey(key);
+			
 		CASValue casv = gets(key, timeoutMiliSec);
 		if (casv == null) {
 			return null;
@@ -609,6 +630,8 @@ public class QuickCachedClientImpl extends MemcachedClient {
 
 	public boolean delete(String key, long timeoutMiliSec) throws TimeoutException {
 		try {
+			validateKey(key);
+			
 			StringBuilder sb = new StringBuilder();
 			//delete <key> [noreply]\r\n
 			sb.append("delete ").append(key).append("\r\n");
@@ -892,7 +915,9 @@ public class QuickCachedClientImpl extends MemcachedClient {
 
 	@Override
 	public CASValue gets(String key, long timeoutMiliSec)
-		throws TimeoutException, MemcachedException {
+			throws TimeoutException, MemcachedException {
+		validateKey(key);
+		
 		CASValue casObject = null;
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -909,8 +934,10 @@ public class QuickCachedClientImpl extends MemcachedClient {
 	}
 
 	@Override
-	public CASResponse cas(String key, Object value, int ttlSec, long cas, long timeoutMiliSec)
-		throws TimeoutException, MemcachedException {
+	public CASResponse cas(String key, Object value, int ttlSec, long cas, 
+			long timeoutMiliSec) throws TimeoutException, MemcachedException {
+		validateKey(key);
+		
 		try {
 			StringBuilder sb = new StringBuilder();
 
@@ -997,12 +1024,12 @@ public class QuickCachedClientImpl extends MemcachedClient {
 
 	@Override
 	public <T> Map<String, T> getBulk(Collection<String> keyCollection,
-									  long timeoutMiliSec) throws TimeoutException, MemcachedException {
+			long timeoutMiliSec) throws TimeoutException, MemcachedException {
 		return get(keyCollection, timeoutMiliSec);
 	}
 
 	public <T> Map<String, T> get(Collection<String> keyCollection,
-								  long timeoutMiliSec) throws TimeoutException, MemcachedException {
+			long timeoutMiliSec) throws TimeoutException, MemcachedException {
 		if (keyCollection == null || keyCollection.isEmpty()) {
 			return null;
 		}
@@ -1031,15 +1058,18 @@ public class QuickCachedClientImpl extends MemcachedClient {
 					try {
 						pbc = blockingClientPool.getBlockingClient(ci);
 						if (pbc == null) {
-							throw new TimeoutException("we do not have any client[pbc] to connect to server!");
+							throw new TimeoutException(
+								"we do not have any client[pbc] to connect to server!");
 						}
 
 						BlockingClient bc = pbc.getBlockingClient();
 						if (bc == null) {
-							throw new TimeoutException("we do not have any client[bc] to connect to server!");
+							throw new TimeoutException(
+								"we do not have any client[bc] to connect to server!");
 						}
 
-						res.add(exec.submit(new MultiLineResCommandRunner(blockingClientPool, cmd.toString(), pbc)));
+						res.add(exec.submit(
+							new MultiLineResCommandRunner(blockingClientPool, cmd.toString(), pbc)));
 
 					} catch (Exception e) {
 						if (pbc != null) {
@@ -1055,7 +1085,8 @@ public class QuickCachedClientImpl extends MemcachedClient {
 
 			try {
 				for (Future<List<GenericResponse>> futureObj : res) {
-					List<GenericResponse> resultPart = futureObj.get(timeoutMiliSec, TimeUnit.MILLISECONDS);
+					List<GenericResponse> resultPart = futureObj.get(
+						timeoutMiliSec, TimeUnit.MILLISECONDS);
 					for (GenericResponse entry : resultPart) {
 						if (entry != null) {
 							result.put(entry.getKey(), (T) entry.getValue());
@@ -1094,6 +1125,8 @@ public class QuickCachedClientImpl extends MemcachedClient {
 	public long increment(String key, int delta, long defaultValue, 
 			int ttlSec, long timeoutMiliSec) throws TimeoutException, 
 			MemcachedException {
+		validateKey(key);
+		
 		long result;
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -1129,6 +1162,8 @@ public class QuickCachedClientImpl extends MemcachedClient {
 	@Override
 	public void incrementWithNoReply(String key, int delta) 
 			throws MemcachedException {
+		validateKey(key);
+		
 		try {
 			increment(key, delta, delta, 0, getDefaultTimeoutMiliSec());
 		} catch (TimeoutException ex) {
@@ -1146,6 +1181,8 @@ public class QuickCachedClientImpl extends MemcachedClient {
 	@Override
 	public long decrement(String key, int delta, long defaultValue, 
 			int ttlSec, long timeoutMiliSec) throws TimeoutException, MemcachedException {
+		validateKey(key);
+		
 		long result = -1;
 		try {
 			StringBuilder sb = new StringBuilder();

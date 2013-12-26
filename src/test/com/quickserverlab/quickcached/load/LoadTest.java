@@ -194,6 +194,9 @@ public class LoadTest {
 		} catch (TimeoutException e) {
 			System.out.println("Timeout(set): "+e+" for "+key);
 			timeouts++;
+		} catch (MemcachedException e) {
+			System.out.println("MemcachedException(set): "+e+" for "+key);
+			//timeouts++;
 		} 
 	}
 

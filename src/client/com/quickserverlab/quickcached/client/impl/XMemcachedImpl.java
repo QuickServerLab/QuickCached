@@ -63,7 +63,9 @@ public class XMemcachedImpl extends MemcachedClient {
 		c = null;
 	}
 
-	public void set(String key, int ttlSec, Object value, long timeoutMiliSec) throws TimeoutException {
+	public void set(String key, int ttlSec, Object value, long timeoutMiliSec) 
+			throws TimeoutException, 
+			com.quickserverlab.quickcached.client.MemcachedException {
 		try {
 			c.set(key, ttlSec, value, timeoutMiliSec);
 		} catch (java.util.concurrent.TimeoutException ex) {
@@ -74,6 +76,8 @@ public class XMemcachedImpl extends MemcachedClient {
 		} catch (MemcachedException ex) {
 			Logger.getLogger(XMemcachedImpl.class.getName()).log(Level.SEVERE, 
 					"MemcachedException", ex);
+			throw new com.quickserverlab.quickcached.client.MemcachedException(
+				"MemcachedException: "+ex.getMessage());
 		}		
 	}
 	

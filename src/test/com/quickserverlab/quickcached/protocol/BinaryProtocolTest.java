@@ -84,7 +84,7 @@ public class BinaryProtocolTest extends ProtocolTest {
 		assertEquals("World",  readObject);
 	}
 	
-	public void testGat() throws TimeoutException {		
+	public void testGat() throws TimeoutException, MemcachedException {		
 		String readObject = null;
 		String key = null;
 		String value = null;

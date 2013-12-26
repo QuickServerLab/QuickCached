@@ -1,5 +1,6 @@
 package com.quickserverlab.quickcached.client;
 
+import com.quickserverlab.quickcached.client.impl.QuickCachedClientImpl;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,6 +60,10 @@ public abstract class MemcachedClient {
 	}
 
 	private long defaultTimeoutMiliSec = 1000;//1sec
+	
+	private long maxSizeAllowedForValue = 1024*1024*5;//5mb
+	private int maxSizeAllowedForKey = 250;
+	
 	public long getDefaultTimeoutMiliSec() {
 		return defaultTimeoutMiliSec;
 	}
@@ -78,7 +83,7 @@ public abstract class MemcachedClient {
 	public abstract void removeServer(String list);
 	
 	public abstract void set(String key, int ttlSec, Object value, long timeoutMiliSec) 
-			throws TimeoutException;       
+			throws MemcachedException, TimeoutException;       
 	public abstract Object get(String key, long timeoutMiliSec) throws MemcachedException, TimeoutException;
 	
 	public abstract CASValue gets(String key, long timeoutMiliSec) 
@@ -130,7 +135,7 @@ public abstract class MemcachedClient {
 	public abstract Map getVersions() throws TimeoutException;	
 	
 	public void set(String key, int ttlSec, Object value) 
-			throws TimeoutException {
+			throws TimeoutException, MemcachedException {
 		set(key, ttlSec, value, defaultTimeoutMiliSec);
 	}
 	public Object get(String key) throws MemcachedException, TimeoutException {
@@ -203,5 +208,64 @@ public abstract class MemcachedClient {
 	
 	public Object gat(String key, int ttlSec) throws TimeoutException {
 		return gat(key, ttlSec, defaultTimeoutMiliSec);
+	}
+
+	/**
+	 * Supported only for QuickCachedClientImpl
+	 * @return the maxSizeAllowedForValue
+	 */
+	public long getMaxSizeAllowedForValue() {
+		return maxSizeAllowedForValue;
+	}
+
+	/**
+	 * Supported only for QuickCachedClientImpl
+	 * @param maxSizeAllowedForValue the maxSizeAllowedForValue to set; -1 means not limit
+	 */
+	public void setMaxSizeAllowedForValue(long maxSizeAllowedForValue) {
+		if(this instanceof QuickCachedClientImpl) {
+			this.maxSizeAllowedForValue = maxSizeAllowedForValue;
+		} else {
+			throw new IllegalStateException(
+				"This method is only supported for QuickCachedClientImpl");
+		}
+	}
+
+	/**
+	 * Supported only for QuickCachedClientImpl
+	 * @return the maxSizeAllowedForKey
+	 */
+	public int getMaxSizeAllowedForKey() {
+		return maxSizeAllowedForKey;
+	}
+
+	/**
+	 * Supported only for QuickCachedClientImpl
+	 * @param maxSizeAllowedForKey the maxSizeAllowedForKey to set; -1 means not limit
+	 */
+	public void setMaxSizeAllowedForKey(int maxSizeAllowedForKey) {
+		if(this instanceof QuickCachedClientImpl) {
+			this.maxSizeAllowedForKey = maxSizeAllowedForKey;
+		} else {
+			throw new IllegalStateException(
+				"This method is only supported for QuickCachedClientImpl");
+		}
+	}
+	
+	protected void validateKey(String key) {
+		if(getMaxSizeAllowedForKey()>0) {
+			if(key.length() > getMaxSizeAllowedForKey()) {
+				throw new IllegalArgumentException("Bad key passed.. its too big! "+key);
+			}
+		}
+	}
+	
+	protected void validateValue(String key, byte[] value) {
+		if(getMaxSizeAllowedForValue()>0) {
+			if(value.length > getMaxSizeAllowedForValue()) {
+				throw new IllegalArgumentException(
+					"Bad value passed.. its too big! key: "+key);
+			}
+		}
 	}
 }

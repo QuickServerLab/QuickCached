@@ -172,7 +172,11 @@ public class LoadMemTest {
 		try {
 			c.set(key, 3600, value);
 		} catch (TimeoutException ex) {
-			Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, "Timeout: "+ex, ex);
+			Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, 
+				"Timeout: "+ex, ex);
+		} catch (MemcachedException ex) {
+			Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, 
+				"Memcached Exception: "+ex, ex);
 		}
 	}
 
@@ -183,9 +187,11 @@ public class LoadMemTest {
 			try {
 				readObject = (String) c.get(key);
 			} catch (TimeoutException ex) {
-				Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, "Timeout: "+ex, ex);
+				Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, 
+					"Timeout: "+ex, ex);
 			} catch (MemcachedException ex) {
-				Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, "Memcached Exception: "+ex, ex);
+				Logger.getLogger(LoadMemTest.class.getName()).log(Level.SEVERE, 
+					"Memcached Exception: "+ex, ex);
 			}
 			if(readObject==null) {
 				System.out.println("get was null! for "+key);
