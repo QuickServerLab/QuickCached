@@ -38,6 +38,7 @@
 	</default-data-mode>	
 
 	<console-logging-level>WARNING</console-logging-level>
+	
 	<console-logging-formatter>
 		org.quickserver.util.logging.SimpleConsoleFormatter
 	</console-logging-formatter>
@@ -146,7 +147,7 @@
 		
 		<property>
 			<property-name>ENTRIES_TO_LOG</property-name>
-			<property-value>datetime,curr_connections,total_connections,bytes_read,bytes,limit_maxbytes,mem_percent_used,curr_items,total_items,cmd_get,cmd_set,cmd_delete,cmd_flush,get_hits,get_misses,delete_misses,delete_hits,gc_calls,slow_res</property-value>
+			<property-value>datetime,curr_connections,total_connections,bytes_read,bytes,limit_maxbytes,mem_percent_used,curr_items,total_items,cmd_get,cmd_set,cmd_delete,cmd_flush,get_hits,get_misses,delete_misses,delete_hits,gc_calls,slow_res,slow_res_avg_percent</property-value>
 		</property>
 
 		<property>
@@ -162,6 +163,11 @@
 		<property>
 			<property-name>MAX_SIZE_FOR_VALUE_IN_MB</property-name>
 			<property-value>5</property-value>
+		</property>
+		
+		<property>
+			<property-name>SLOW_RESPONSE_AVG_RANGE</property-name>
+			<property-value>100</property-value>
 		</property>
 
 	</application-configuration>
