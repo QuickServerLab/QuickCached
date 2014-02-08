@@ -10,7 +10,7 @@ QuickCached is simple yet powerful. Its simple design promotes quick deployment,
 
 Website
 ---------------------
- * http://www.quickcached.org/
+ * https://github.com/QuickServerLab/QuickCached
  * http://code.google.com/p/quickcached/
 
 
@@ -18,9 +18,8 @@ Website
 License, Copyright
 ---------------------
 QuickCached - A memcached server implementation in Java
-Copyright (C) 2011-2013 QuickServer Lab
+Copyright (C) 2011-2014 QuickServer Lab
 Website	   : http://www.quickcached.org/
-Author     : Akshathkumar Shetty
 Email	   : akshath@quickserver.org
 
 
@@ -64,8 +63,8 @@ JUnit :
  A framework to write repeatable tests. 
 
 
-Date: 20 Oct 2012
+Date: 08 Feb 2014
 ---------------------
 
-Copyright (C) 2011-2013 QuickServer Lab
-http://code.google.com/p/quickcached/ 
+Copyright (C) 2011-2014 QuickServer Lab
+https://github.com/QuickServerLab/QuickCached
