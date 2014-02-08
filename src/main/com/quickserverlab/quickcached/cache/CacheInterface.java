@@ -21,7 +21,7 @@ public interface CacheInterface {
 	
 	public boolean touch(String key, int expInSec) throws CacheException;	
 	
-
+	public Object get(String key, boolean incrementCount) throws CacheException;
 	public Object get(String key) throws CacheException;		
 	public boolean delete(String key) throws CacheException;	
 

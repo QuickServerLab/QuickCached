@@ -168,17 +168,27 @@ public abstract class BaseCacheImpl implements CacheInterface {
 			throw new CacheException(ex.toString());
 		}
 	}
-
+	
 	public Object get(String key) throws CacheException {
+		return get(key, true);
+	}
+
+	public Object get(String key, boolean incrementCount) throws CacheException {
 		if(QuickCached.DEBUG) logger.log(Level.FINE, "get key: {0}", key);
-		cmdGets++;
+		if(incrementCount) {
+			cmdGets++;
+		}
+		
 		Object obj = get_(key);
-		if(obj!=null) {
-			getHits++;
-		} else {
-			if(QuickCached.DEBUG) logger.log(Level.FINE, "no value for key: {0}", 
-					key);
-			getMisses++;
+		
+		if(incrementCount) {
+			if(obj!=null) {
+				getHits++;
+			} else {
+				if(QuickCached.DEBUG) logger.log(Level.FINE, "no value for key: {0}", 
+						key);
+				getMisses++;
+			}
 		}
 		return obj;
 	}

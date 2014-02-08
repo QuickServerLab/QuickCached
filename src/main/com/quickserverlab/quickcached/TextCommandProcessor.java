@@ -290,7 +290,7 @@ public class TextCommandProcessor {
 		}
 
 
-		DataCarrier dc = (DataCarrier) cache.get(key);
+		DataCarrier dc = (DataCarrier) cache.get(key, false);
 		if (dc == null) {
 			if (noreplay == false) {
 				sendResponse(handler, "NOT_FOUND\r\n");
@@ -417,7 +417,7 @@ public class TextCommandProcessor {
 		dc.setFlags(data.getFlags());
 
 		if (data.getCmd().equals("set")) {
-			DataCarrier olddata = (DataCarrier) cache.get(data.getKey());
+			DataCarrier olddata = (DataCarrier) cache.get(data.getKey(), false);
 			if(olddata==null) {
 				cache.set(data.getKey(), dc, dc.getSize(), data.getExptime());
 			} else {
@@ -435,7 +435,7 @@ public class TextCommandProcessor {
 				sendResponse(handler, "STORED\r\n");
 			}
 		} else if (data.getCmd().equals("add")) {
-			Object olddata = cache.get(data.getKey());
+			Object olddata = cache.get(data.getKey(), false);
 			if (olddata == null) {
 				cache.set(data.getKey(), dc, dc.getSize(), data.getExptime());
 				if (data.isNoreplay() == false) {
@@ -447,7 +447,7 @@ public class TextCommandProcessor {
 				}
 			}
 		} else if (data.getCmd().equals("replace")) {
-			DataCarrier olddata = (DataCarrier) cache.get(data.getKey());
+			DataCarrier olddata = (DataCarrier) cache.get(data.getKey(), false);
 			if (olddata != null) {
 				olddata.writeLock.lock();
 				try {
@@ -471,7 +471,7 @@ public class TextCommandProcessor {
 				}
 			}
 		} else if (data.getCmd().equals("append")) {
-			DataCarrier olddata = (DataCarrier) cache.get(data.getKey());
+			DataCarrier olddata = (DataCarrier) cache.get(data.getKey(), false);
 			if (olddata != null) {
 				olddata.writeLock.lock();
 				try {
@@ -495,7 +495,7 @@ public class TextCommandProcessor {
 				}
 			}
 		} else if (data.getCmd().equals("prepend")) {
-			DataCarrier olddata = (DataCarrier) cache.get(data.getKey());
+			DataCarrier olddata = (DataCarrier) cache.get(data.getKey(), false);
 			if (olddata != null) {
 				olddata.writeLock.lock();
 				try {
@@ -521,7 +521,7 @@ public class TextCommandProcessor {
 		} else if (data.getCmd().equals("cas")) {
 			String reply = null;			
 			
-			DataCarrier olddata = (DataCarrier) cache.get(data.getKey());			
+			DataCarrier olddata = (DataCarrier) cache.get(data.getKey(), false);			
 			if(olddata != null) {
 				olddata.writeLock.lock();
 				try {

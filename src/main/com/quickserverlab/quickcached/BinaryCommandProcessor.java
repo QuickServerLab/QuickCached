@@ -118,7 +118,7 @@ public class BinaryCommandProcessor {
 
 			sendResponse(handler, binaryPacket);
 		} else if (OpCode.SET.equals(opcode) || OpCode.SET_Q.equals(opcode)) {//Set,SetQ
-			DataCarrier dc = (DataCarrier) cache.get(command.getKey());
+			DataCarrier dc = (DataCarrier) cache.get(command.getKey(), false);
 
 			if (command.getHeader().getCas() != null
 					&& "0000000000000000".equals(command.getHeader().getCas()) == false) {
@@ -183,7 +183,7 @@ public class BinaryCommandProcessor {
 				sendResponse(handler, binaryPacket);
 			}
 		} else if (OpCode.ADD.equals(opcode) || OpCode.ADD_Q.equals(opcode)) {
-			DataCarrier olddc = (DataCarrier) cache.get(command.getKey());
+			DataCarrier olddc = (DataCarrier) cache.get(command.getKey(), false);
 			if (olddc != null) {
 				if (OpCode.ADD.equals(opcode)) {
 					rh.setStatus(ResponseHeader.KEY_EXISTS);
@@ -209,7 +209,7 @@ public class BinaryCommandProcessor {
 				sendResponse(handler, binaryPacket);
 			}
 		} else if (OpCode.REPLACE.equals(opcode) || OpCode.REPLACE_Q.equals(opcode)) {
-			DataCarrier olddc = (DataCarrier) cache.get(command.getKey());
+			DataCarrier olddc = (DataCarrier) cache.get(command.getKey(), false);
 			if (olddc == null) {
 				if (OpCode.REPLACE.equals(opcode)) {
 					rh.setStatus(ResponseHeader.KEY_NOT_FOUND);
@@ -270,7 +270,7 @@ public class BinaryCommandProcessor {
 				sendResponse(handler, binaryPacket);
 			}
 		} else if (OpCode.APPEND.equals(opcode) || OpCode.APPEND_Q.equals(opcode)) {
-			DataCarrier olddc = (DataCarrier) cache.get(command.getKey());
+			DataCarrier olddc = (DataCarrier) cache.get(command.getKey(), false);
 			if (olddc == null) {
 				if (OpCode.APPEND.equals(opcode)) {
 					rh.setStatus(ResponseHeader.ITEM_NOT_STORED);
@@ -327,7 +327,7 @@ public class BinaryCommandProcessor {
 				sendResponse(handler, binaryPacket);
 			}
 		} else if (OpCode.PREPEND.equals(opcode) || OpCode.PREPEND_Q.equals(opcode)) {
-			DataCarrier olddc = (DataCarrier) cache.get(command.getKey());
+			DataCarrier olddc = (DataCarrier) cache.get(command.getKey(), false);
 			if (olddc == null) {
 				if (OpCode.PREPEND.equals(opcode)) {
 					rh.setStatus(ResponseHeader.ITEM_NOT_STORED);
@@ -407,7 +407,7 @@ public class BinaryCommandProcessor {
 				throw new IllegalStateException("We should not be here!! " + opcode);
 			}
 
-			DataCarrier olddc = (DataCarrier) cache.get(command.getKey());
+			DataCarrier olddc = (DataCarrier) cache.get(command.getKey(), false);
 			if (olddc == null) {
 				if (extras.getExpiration().equals("ffffffff") == true) {//as per protocol
 					if (op == 'I') {
