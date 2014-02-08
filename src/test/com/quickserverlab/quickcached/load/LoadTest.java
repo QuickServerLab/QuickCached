@@ -138,6 +138,7 @@ public class LoadTest {
 				int ps = threadCount+(threadCount*100/100);
 				c.setConnectionPoolSize(ps);
 				System.out.println("ConnectionPoolSize: "+ps);
+				System.out.println("Per thread count: "+count);
 				c.init();
 				
 				Thread.sleep(4000);

@@ -16,6 +16,7 @@ version 2.0.0 [??]
 + Added total_res_count,slow_res_count,slow_res_percent,slow_res_avg_time_ms to stats
 # Fixed slow res calculation bugs
 # Fixed pool size in load test code
+# Fixed get_count in stats bug (was including internal get calls)
 
 version 2.0.0 RC1 [20-Oct-2012]
 ---------------------------
