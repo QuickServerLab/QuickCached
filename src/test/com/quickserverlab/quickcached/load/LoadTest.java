@@ -16,6 +16,7 @@ public class LoadTest {
 	private String name;
 	private String hostList;
 	private int timeouts;
+	private int threadCount;
 	
 	private static MemcachedClient c = null;
 	private static int objectSize = 1024;//1kb
@@ -44,7 +45,7 @@ public class LoadTest {
     }
 
 	public static void doSingleThreadTest(String host, int txn) {
-		LoadTest ltu = new LoadTest("Test1", host, txn);
+		LoadTest ltu = new LoadTest("Test1", host, txn, 1);
 		ltu.setUp();
 		long stime = System.currentTimeMillis();
         ltu.test1();
@@ -62,10 +63,10 @@ public class LoadTest {
 
 		final LoadTest ltu[] = new LoadTest[threads];
 		for(int i=0;i<threads;i++) {
-			ltu[i] = new LoadTest("Test-"+i, host, eachUnitCount);
+			ltu[i] = new LoadTest("Test-"+i, host, eachUnitCount, threads);
 			ltu[i].setUp();
 		}
-
+		
 		Thread threadPool[] = new Thread[threads];
 		for(int i=0;i<threads;i++) {
 			final int myi = i;
@@ -120,10 +121,11 @@ public class LoadTest {
 		}
 	}
 	
-	public LoadTest(String name, String host, int count) {
+	public LoadTest(String name, String host, int count, int threadCount) {
         this.count = count;
 		this.name = name;
 		this.hostList = host;
+		this.threadCount = threadCount;
     }
 
 	public void setUp(){
@@ -132,8 +134,10 @@ public class LoadTest {
 				c = MemcachedClient.getInstance();
 				//c.setUseBinaryConnection(useBinaryConnection);
 				c.setAddresses(hostList);
-				c.setDefaultTimeoutMiliSec(3000);//3 sec
-				c.setConnectionPoolSize(30);
+				c.setDefaultTimeoutMiliSec(1000);//1 sec
+				int ps = threadCount+(threadCount*100/100);
+				c.setConnectionPoolSize(ps);
+				System.out.println("ConnectionPoolSize: "+ps);
 				c.init();
 				
 				Thread.sleep(4000);

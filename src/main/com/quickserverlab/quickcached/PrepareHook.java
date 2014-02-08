@@ -63,12 +63,10 @@ public class PrepareHook implements ServerHook {
 					CommandHandler.setSlowResponseThreshold(500);
 				}
 
-				String slowResponseAvgRange = (String) config.get(Constants.CONFIG_KEY__SLOW_RESPONSE_AVG_RANGE);
+				String slowResponseAvgRange = (String) config.get("SLOW_RESPONSE_AVG_MAX_SAMPLE_SIZE");
 				if(slowResponseAvgRange!=null) {
-					CommandHandler.setSlowResponseAvgRange(Long.parseLong(slowResponseAvgRange));
-				} else {
-					CommandHandler.setSlowResponseAvgRange(Constants.DEFAULT_CONFIG_VALUE__SLOW_RESPONSE_AVG_RANGE);
-				}
+					CommandHandler.setSlowResponseAvgMaxSampleSize(Long.parseLong(slowResponseAvgRange));
+				} 
 
 				if("true".equals(enableStatsReportStr)) {
 					enableStatsReport = true;

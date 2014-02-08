@@ -7,16 +7,10 @@ import org.quickserver.net.server.ClientEventHandler;
 
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.*;
 
 
@@ -25,14 +19,20 @@ import com.quickserverlab.quickcached.binary.ResponseHeader;
 import com.quickserverlab.quickcached.cache.CacheException;
 import com.quickserverlab.quickcached.cache.CacheInterface;
 import com.quickserverlab.quickcached.mem.MemoryWarningSystem;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.quickserver.net.server.ClientBinaryHandler;
 import org.quickserver.net.server.QuickServer;
 
+/**
+ * 
+ * @author Akshath
+ */
 public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
-
 	private static final Logger logger = Logger.getLogger(CommandHandler.class.getName());
+	
 	private static final SimpleDateFormat sdfDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	private static CacheInterface cache = null;
 	private static TextCommandProcessor textCommandProcessor = null;
 	private static BinaryCommandProcessor binaryCommandProcessor = null;
@@ -48,6 +48,7 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 	protected volatile static long casHits;
 	protected volatile static long casBadval;
 
+	protected volatile static long totalResponseCount;
 	protected volatile static long slowResponseCount;
 	private static boolean computeAvgForSetCmd = false;
 	private static long slowResponseThreshold = 500;
@@ -58,7 +59,7 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 	 * the most recent 'n' requests over which the slow response average value is calculated.
 	 * </pre> 
 	 */
-	private static long slowResponseAvgRange; // For : STATS-AVG_SLOW_RESPONSE
+	private static long slowResponseAvgMaxSampleSize = 100; // default 100
 	
 	/*
 	 * <pre>
@@ -66,61 +67,46 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 	 * Every time an operation is performed where slow response monitoring is required, this count is incremented by one. (get, set, delete..)
 	 * </pre>
 	 */
-//	private static final AtomicInteger slowResponseObservablesTotalCommandsCount = new AtomicInteger(); // For : STATS-AVG_SLOW_RESPONSE
+	private static final Queue<Integer> slowResponseValuesQueue = new ConcurrentLinkedQueue<Integer>(); // For : STATS-AVG_SLOW_RESPONSE 
 	
-	/*
-	 * Note: Using linked list resulted in nulls being present even though the values were primitive ! (bug in push - pop ?)
+	/**
+	 * 
+	 * @param timeTaken time in ms
 	 */
-	private static final Queue<Integer> slowResponseValuesQueue = new PriorityQueue<Integer>(); // For : STATS-AVG_SLOW_RESPONSE 
-	
-	private static void updateSlowResponseDetails(long timeTaken) { // For : STATS-AVG_SLOW_RESPONSE
-		if( slowResponseValuesQueue.size() < slowResponseAvgRange) {
+	private static void updateSlowResponseDetails(long timeTaken) {
+		if(slowResponseValuesQueue.size() < slowResponseAvgMaxSampleSize) {
 			slowResponseValuesQueue.add((int)timeTaken);
-		}
-		else {
-			if( slowResponseValuesQueue.size() > slowResponseAvgRange) { // requires another check since the add operation is not thread safe..
+		} else {
+			if(slowResponseValuesQueue.size() > slowResponseAvgMaxSampleSize) {
 				slowResponseValuesQueue.poll(); // retrieve and remove...
 			}
 			slowResponseValuesQueue.add((int)timeTaken);
 		}
 	}
 	
-	
 	private static String formattedSlowResponseAverage() { // For : STATS-AVG_SLOW_RESPONSE
-		double averageSlowResponse=determineSlowResponseAverage();
+		double averageSlowResponse = determineSlowResponseAverage();
 		if(averageSlowResponse == Constants.DEFAULT_INT_UN_INITIALIZED_VALUE) {
-			return Constants.NOT_APPLICABLE__ABBR;
+			return Constants.NOT_APPLICABLE_ABBR;
 		}
-		return Constants.DEFAULT_DECIMAL_FORMAT.format(averageSlowResponse)+Constants.EMPTY_STRING;
+		return Constants.DEFAULT_DECIMAL_FORMAT.format(averageSlowResponse);
 	}
 	
-	private static double determineSlowResponseAverage() { // For : STATS-AVG_SLOW_RESPONSE
-		
-		logger.log(Level.FINE, "Slow Response Avg Range: {0}", slowResponseAvgRange );
-		
-		if( slowResponseValuesQueue.size() < slowResponseAvgRange) { // there have not been sufficient requests to determine the average.
+	private static double determineSlowResponseAverage() {	
+		if(slowResponseValuesQueue.isEmpty()) {
 			return Constants.DEFAULT_INT_UN_INITIALIZED_VALUE;
 		}
 		
-		double averageSlowResponse = 0.0; // use BigDecimal?
+		double averageSlowResponse = 0.0;
+		Integer[] slowResponseValuesTempArray = slowResponseValuesQueue.toArray(new Integer[0]);
 		
-		int tempSlowResCount = 0;
-		int nullCount=0;
-		Object[] slowResponseValuesTempArray = slowResponseValuesQueue.toArray();
-		
-//		System.out.println("Queue: " + slowResponseValuesQueue);
-//		System.out.println("Queue Copy: " + Arrays.toString( slowResponseValuesTempArray ));
-		
-		for(Object i : slowResponseValuesTempArray ) {
-			if( i == null ) {
-				nullCount++;
-			}
-			else if( ((Integer)i > slowResponseThreshold)) {
-				tempSlowResCount++;
-			}
+		long sum = 0;
+		long count = 0;
+		for(Integer i : slowResponseValuesTempArray ) {
+			sum = i.intValue() + sum;
+			count++;
 		}
-//		System.out.println("Null count: " + nullCount);
-		averageSlowResponse = ((tempSlowResCount * 100.0) / (slowResponseValuesTempArray.length-nullCount) ); // in case queue has nulls !!
+		averageSlowResponse = (sum * 1.0) / count;
 		return averageSlowResponse;
 	}
 	
@@ -132,12 +118,12 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 		CommandHandler.slowResponseThreshold = slowResponseThreshold;
 	}
 	
-	public static void setSlowResponseAvgRange(long slowResponseAvgRange) {
-		CommandHandler.slowResponseAvgRange = slowResponseAvgRange;
+	public static void setSlowResponseAvgMaxSampleSize(long slowResponseAvgMaxSampleSize) {
+		CommandHandler.slowResponseAvgMaxSampleSize = slowResponseAvgMaxSampleSize;
 	}
 
-	public static long getSlowResponseAvgRange() {
-		return slowResponseAvgRange;
+	public static long getSlowResponseAvgMaxSampleSize() {
+		return slowResponseAvgMaxSampleSize;
 	}
 	
 	public static Map getStats(QuickServer server) {
@@ -208,11 +194,16 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 		stats.put("app_impl_used", cache.getName());
 
 		stats.put("gc_calls", "" + gcCalls);
-		stats.put("slow_res", "" + slowResponseCount);
-		stats.put(Constants.STATS_KEY__SLOW_RES_AVG_PERCENT, formattedSlowResponseAverage() ); // For : STATS-AVG_SLOW_RESPONSE
-//		stats.put("slow_res_avg_data_count_two_temp", ""+slowResponseValuesQueue.size() ); // For : STATS-AVG_SLOW_RESPONSE
-//		stats.put("slow_res_avg_data_two_temp", ""+ Arrays.toString(  slowResponseValuesQueue.toArray() ) ); // For : STATS-AVG_SLOW_RESPONSE
-
+		stats.put("total_res_count", "" + totalResponseCount);
+		stats.put("slow_res_count", "" + slowResponseCount);		
+		if(slowResponseCount>0) {
+			stats.put("slow_res_percent", Constants.DEFAULT_DECIMAL_FORMAT.format(slowResponseCount*100.0/totalResponseCount));
+			stats.put("slow_res_avg_time_ms", formattedSlowResponseAverage());
+		} else {
+			stats.put("slow_res_percent", Constants.NOT_APPLICABLE_ABBR);
+			stats.put("slow_res_avg_time_ms", Constants.NOT_APPLICABLE_ABBR);
+		}	
+		
 		return stats;
 	}
 
@@ -284,17 +275,19 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 				} catch (CacheException e) {
 					logger.log(Level.WARNING, "Error[ce]: " + e, e);
 					textCommandProcessor.sendResponse(handler, "SERVER_ERROR " + e.getMessage() + "\r\n");
-				} finally {
-					long end = System.currentTimeMillis();
-					long timeTaken = end - start;
-					if(start > 0) { 
-						updateSlowResponseDetails(timeTaken); 
-					}
-					if (timeTaken > slowResponseThreshold) {
-						slowResponseCount++;
-						if (QuickCached.DEBUG) {
-							logger.log(Level.WARNING, "Time Taken to process :{0}", timeTaken);
+				} finally {				
+					if(start!=0) {
+						long end = System.currentTimeMillis();
+						long timeTaken = end - start;
+						if (timeTaken > slowResponseThreshold) {
+							slowResponseCount++;
+							updateSlowResponseDetails(timeTaken); 
+
+							if (QuickCached.DEBUG) {
+								logger.log(Level.WARNING, "Time Taken to process :{0}", timeTaken);
+							}
 						}
+						totalResponseCount++;
 					}
 				}
 			}
@@ -312,27 +305,13 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 					} catch (Exception ex) {
 						logger.log(Level.SEVERE, "Error: " + ex, ex);
 						throw new IOException("" + ex);
-					} finally {
-						long end = System.currentTimeMillis();
-						long timeTaken = end - start;
-						if(start > 0) { 
-							updateSlowResponseDetails(timeTaken); 
-						}
-						if (timeTaken > slowResponseThreshold) {
-							slowResponseCount++;
-							if (QuickCached.DEBUG) {
-								logger.log(Level.WARNING, "Time Taken to process :{0}", timeTaken);
-							}
-						}
-					}
-
+					} 
+					
 					if (bp != null) {
 						if (QuickCached.DEBUG) {
 							logger.fine("BinaryCommand Start");
 						}
-						start = 0;
 						try {
-							start = System.currentTimeMillis();
 							binaryCommandProcessor.handleBinaryCommand(handler, bp);
 						} catch (IllegalArgumentException e) {
 							logger.log(Level.WARNING, "Error[iae]: " + e, e);
@@ -372,15 +351,17 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 							binaryCommandProcessor.sendResponse(handler, binaryPacket);
 						} finally {
 							long end = System.currentTimeMillis();
-							long timeTaken = end - start;
-							if(start > 0) { 
-								updateSlowResponseDetails(timeTaken); 
-							}
-							if (timeTaken > slowResponseThreshold) {
-								slowResponseCount++;
-								if (QuickCached.DEBUG) {
-									logger.log(Level.WARNING, "Time Taken to process :{0}", timeTaken);
+							if(start!=0) {
+								long timeTaken = end - start;
+
+								if (timeTaken > slowResponseThreshold) {
+									slowResponseCount++;
+									updateSlowResponseDetails(timeTaken); 
+									if (QuickCached.DEBUG) {
+										logger.log(Level.WARNING, "Time Taken to process :{0}", timeTaken);
+									}
 								}
+								totalResponseCount++;
 							}
 						}
 						if (QuickCached.DEBUG) {
@@ -411,15 +392,15 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 						} finally {
 							long end = System.currentTimeMillis();
 							long timeTaken = end - start;
-							if(start > 0) { 
-								updateSlowResponseDetails(timeTaken); 
-							}
+							
 							if (timeTaken > slowResponseThreshold) {
 								slowResponseCount++;
+								updateSlowResponseDetails(timeTaken); 
 								if (QuickCached.DEBUG) {
 									logger.log(Level.WARNING, "Time Taken to process :{0}", timeTaken);
 								}
 							}
+							totalResponseCount++;
 						}
 					} else {
 						break;
