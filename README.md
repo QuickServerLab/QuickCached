@@ -20,9 +20,11 @@ Forum
 License, Copyright
 ---------------------
 QuickCached - A memcached server implementation in Java
+
 Copyright (C) 2011-2014 QuickServer Lab
+
 Website	   : http://www.quickcached.org/
-Email	   : akshath@quickserver.org
+
 
 
 This library is free software; you can redistribute it and/or
