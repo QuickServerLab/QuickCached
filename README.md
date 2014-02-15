@@ -48,10 +48,12 @@ to thank all of them for making life easier for developers.
 
 -- Included Jars/Libraries --
 QuickServer: http://www.quickserver.org/
+
  QuickServer is an open source Java library/framework for quick 
  creation of robust multi-client TCP server applications. 
  
 whirlycache: https://whirlycache.dev.java.net/
+
  Whirlycache is a fast, flexible in-process cache for Java objects that 
  differs in design philosophy from existing cache implementations. 
  It includes pluggable implementations (FastHashMap, ConcurrentHashMap) 
