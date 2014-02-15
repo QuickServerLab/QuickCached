@@ -13,7 +13,9 @@ Website
  * https://github.com/QuickServerLab/QuickCached
  * http://code.google.com/p/quickcached/
 
-
+Forum
+---------------------
+ * https://groups.google.com/forum/#!forum/quickcached
 
 License, Copyright
 ---------------------
@@ -69,4 +71,5 @@ Date: 15 Feb 2014
 ---------------------
 
 Copyright (C) 2011-2014 QuickServer Lab
+https://code.google.com/p/quickcached/
 https://github.com/QuickServerLab/QuickCached
