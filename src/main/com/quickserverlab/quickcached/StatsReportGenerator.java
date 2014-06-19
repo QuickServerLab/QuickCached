@@ -96,6 +96,7 @@ public class StatsReportGenerator {
 			if(writeheader) {
 				while(iterator.hasNext()) {
 					key = (String) iterator.next();	
+					if(key==null) continue;
 					out.write(key, 0, key.length());
 					
 					if(iterator.hasNext()) {
@@ -109,8 +110,10 @@ public class StatsReportGenerator {
 			
 			iterator = entriesToLog.iterator();
 			while(iterator.hasNext()) {
-				key = (String) iterator.next();		
+				key = (String) iterator.next();	
+				if(key==null) continue;
 				value = (String) stats.get(key);
+				if(value==null) continue;
 
 				out.write(value, 0, value.length());
 				if(iterator.hasNext()) {
