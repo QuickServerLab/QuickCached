@@ -1,7 +1,11 @@
 Version History for QuickCached
 --------------------------------
 
-Current Version: 2.0.0
+Current Version: 2.0.1
+
+version 2.0.1 [02-Jul-2014]
+---------------------------
+# Bug Fix
 
 
 version 2.0.0 [15-Feb-2014]
