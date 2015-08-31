@@ -96,12 +96,24 @@ public class QuickCachedClientImpl extends MemcachedClient {
 	public void init() throws IOException {
 		hostListObj = new HostList("memcached_" + hostList);
 		updatePoolSizes();
-
+                
 		String servers[] = hostList.split(" ");
 		String server[] = null;
 		SocketBasedHost sbh = null;
 		for (int i = 0; i < servers.length; i++) {
+                        if(servers[i].contains(":")==false) {
+                            continue;
+                        }
+                    
 			server = servers[i].split(":");
+                        
+                        if(server[0].trim().isEmpty()) {
+                            continue;
+                        }
+                        if(server[1].trim().isEmpty()) {
+                            continue;
+                        }
+                        
 			try {
 				sbh = new SocketBasedHost(server[0].trim(), 
 					Integer.parseInt(server[1].trim()));
