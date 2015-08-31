@@ -134,7 +134,7 @@
 	<target name="loadtest" depends="compileTests">
 		<java fork="yes" classname="com.quickserverlab.quickcached.load.LoadTest"
             taskname="loadtest" failonerror="true">
-			<arg line="m 20 127.0.0.1:11211,127.0.0.1:11212 1000"/>
+			<arg line="m 100 127.0.0.1:11211,127.0.0.1:11212 10000"/>
 			<!--arg line="m 10 127.0.0.1:11211,127.0.0.1:11212 100"/-->
 			
 			<!--sysproperty key="com.quickserverlab.quickcached.client.defaultImpl"
