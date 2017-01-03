@@ -259,12 +259,16 @@ public class QuickCachedClientImpl extends MemcachedClient {
 			bc.sendBytes(data, charset);
 
 			return bc.readCRLFLine();
-		} catch (IOException e) {
-			if (pbc != null) {
+		} catch (IOException e) {            
+            if (pbc != null) {
 				logger.log(Level.WARNING, "We had an ioerror will close client! " + e, e);
 				pbc.close();
 			}
-			throw new TimeoutException("We had ioerror " + e);
+            if(e instanceof TimeoutException) {
+                throw (TimeoutException) e;
+            } else {
+                throw new TimeoutException("We had ioerror " + e);
+            }	
 		} finally {
 			if (pbc != null) {
 				blockingClientPool.returnBlockingClient(pbc);
