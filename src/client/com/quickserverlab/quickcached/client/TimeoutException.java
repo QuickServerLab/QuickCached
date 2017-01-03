@@ -1,10 +1,12 @@
 package com.quickserverlab.quickcached.client;
 
+import java.io.IOException;
+
 /**
  *
  * @author akshath
  */
-public class TimeoutException extends Exception {
+public class TimeoutException extends IOException {
 	public TimeoutException() {
 		super();
 	}

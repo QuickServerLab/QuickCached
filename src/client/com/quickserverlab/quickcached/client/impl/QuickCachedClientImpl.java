@@ -342,7 +342,11 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				logger.log(Level.WARNING, "We had an ioerror will close client! " + e, e);
 				pbc.close();
 			}
-			throw new TimeoutException("We had ioerror " + e);
+            if(e instanceof TimeoutException) {
+                throw (TimeoutException) e;
+            } else {
+                throw new TimeoutException("We had ioerror " + e);
+            }			
 		} finally {
 			if (pbc != null) {
 				blockingClientPool.returnBlockingClient(pbc);
@@ -632,7 +636,11 @@ public class QuickCachedClientImpl extends MemcachedClient {
 				logger.log(Level.WARNING, "We had an ioerror will close client! " + e, e);
 				pbc.close();
 			}
-			throw new TimeoutException("We had ioerror " + e);
+            if(e instanceof TimeoutException) {
+                throw (TimeoutException) e;
+            } else {
+                throw new TimeoutException("We had ioerror " + e);
+            }			
 		} finally {
 			if (pbc != null) {
 				blockingClientPool.returnBlockingClient(pbc);
@@ -798,11 +806,6 @@ public class QuickCachedClientImpl extends MemcachedClient {
 			} catch (IOException e) {
 				if (pbc != null) {
 					logger.log(Level.WARNING, "We had an ioerror will close client! " + e, e);
-					pbc[i].close();
-				}
-			} catch (TimeoutException e) {
-				if (pbc != null) {
-					logger.log(Level.WARNING, "We had an timeout will close client! " + e, e);
 					pbc[i].close();
 				}
 			} finally {
