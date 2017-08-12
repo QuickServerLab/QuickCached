@@ -9,9 +9,9 @@ import java.util.Map;
 import org.apache.log4j.xml.DOMConfigurator;
 
 public class QuickCached {
-	public static final String app_version = "2.0.0";
+	public static final String app_version = "2.0.2";
 	
-    public static String version = "2.0.0";
+    public static String version = "2.0.2";
     public static boolean DEBUG = false;
 	private static QuickServer quickcached;
 
@@ -118,10 +118,14 @@ public class QuickCached {
         }
     }
 
+    private static String pid = null;
 	public static String getPID() {
-		String pid = ManagementFactory.getRuntimeMXBean().getName();
-		int i = pid.indexOf("@");
-		pid = pid.substring(0, i);
+        if(pid!=null) return pid;
+        
+		String _pid = ManagementFactory.getRuntimeMXBean().getName();
+		int i = _pid.indexOf("@");
+		_pid = _pid.substring(0, i);
+        pid = _pid;
 		return pid;
 	}
 	

@@ -21,7 +21,7 @@ License, Copyright
 ---------------------
 QuickCached - A memcached server implementation in Java
 
-Copyright (C) 2011-2014 QuickServer Lab
+Copyright (C) 2011-2017 QuickServer Lab
 
 Website	   : http://www.quickcached.org/
 
@@ -69,9 +69,9 @@ JUnit :
  A framework to write repeatable tests. 
 
 
-Date: 15 Feb 2014
+Date: 12 Aug 2017
 ---------------------
 
-Copyright (C) 2011-2014 QuickServer Lab
+Copyright (C) 2011-2017 QuickServer Lab
 https://code.google.com/p/quickcached/
 https://github.com/QuickServerLab/QuickCached

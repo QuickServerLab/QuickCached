@@ -19,6 +19,7 @@ import com.quickserverlab.quickcached.binary.ResponseHeader;
 import com.quickserverlab.quickcached.cache.CacheException;
 import com.quickserverlab.quickcached.cache.CacheInterface;
 import com.quickserverlab.quickcached.mem.MemoryWarningSystem;
+import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.quickserver.net.server.ClientBinaryHandler;
@@ -52,6 +53,8 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 	protected volatile static long slowResponseCount;
 	private static boolean computeAvgForSetCmd = false;
 	private static long slowResponseThreshold = 500;
+    
+    private static RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
 	
 	/**
 	 * <pre>
@@ -137,10 +140,10 @@ public class CommandHandler implements ClientBinaryHandler, ClientEventHandler {
 
 		//pid
 		String pid = QuickCached.getPID();
-		stats.put("pid", pid);
-
+		stats.put("pid", pid);        
+       
 		//uptime
-		long uptimeSec = ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
+		long uptimeSec = runtimeMXBean.getUptime() / 1000;
 		stats.put("uptime", "" + uptimeSec);
 
 		//time - current UNIX time according to the server 
