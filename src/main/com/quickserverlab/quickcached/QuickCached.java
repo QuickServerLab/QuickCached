@@ -54,9 +54,7 @@ public class QuickCached {
 		
 		
         String confFile = "conf" + File.separator + "QuickCached.xml";
-        Object config[] = new Object[]{confFile};
-        
-        printMemoryInfo();
+        Object config[] = new Object[]{confFile}; 
 
         quickcached = new QuickServer();
         quickcached.initService(config);
@@ -113,6 +111,8 @@ public class QuickCached {
         try {
             if (quickcached != null) {
                 quickcached.startServer();
+                
+                printMemoryInfo();
             }
         } catch (AppException e) {
             System.out.println("Error starting server : " + e);
@@ -144,8 +144,9 @@ public class QuickCached {
 		long heapMaxSize = Runtime.getRuntime().maxMemory();
 		
 		int memPercentUsed = (int) (100.0*usedMemory/heapMaxSize);
-        System.out.println("Memory Alloted  : "+getMemSize(allotedMemory));
-        System.out.println("Memory Max      : "+getMemSize(heapMaxSize));
+        System.out.println("Memory Allotted : "+getMemSize(allotedMemory));
+        System.out.println("Memory Maximum  : "+getMemSize(heapMaxSize));
+        System.out.println("");
     }
 
     private static String pid = null;
