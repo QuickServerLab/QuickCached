@@ -5,7 +5,7 @@ Current Version: 2.0.1
 
 version 2.0.2 [12-Aug-2017]
 ---------------------------
-# Bug Fixs
+# Bug Fixes
 + Upgraded QuickServer to 2.1.0
 
 version 2.0.1 [02-Jul-2014]

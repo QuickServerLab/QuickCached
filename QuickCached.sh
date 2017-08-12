@@ -1,3 +1,4 @@
 #!/bin/bash
 #-XX:+UseParallelGC
-exec java -server -Dappname=QC1 -Xms512m -Xmx512m -XX:CompileThreshold=1500 -XX:+UseConcMarkSweepGC -jar dist/QuickCached-Server.jar $@
+#export QUICKCACHED_OPTS="-Xms512m -Xmx512m"
+exec java -server -Dappname=QC1 $QUICKCACHED_OPTS -XX:CompileThreshold=1500 -XX:+UseConcMarkSweepGC -jar dist/QuickCached-Server.jar $@
